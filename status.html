@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><title>RSVP status</title>
+<link rel="stylesheet" href="style.css">
+<style>.list{margin:1rem 0;font-size:.95rem}</style>
+</head><body>
+<div class="card">
+  <h1>Your response</h1>
+  <div id="details"></div>
+
+  <form id="editForm" style="display:none">
+    <div style="margin:1rem 0">
+      <label><input type="radio" name="reply" value="yes"> Yes</label>
+      <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no"> No</label>
+    </div>
+    <button class="btn" type="submit">Update</button>
+  </form>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import {getFirestore, doc, getDoc, setDoc, Timestamp}
+        from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+      apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
+      authDomain: "gerzlngelairsvp.firebaseapp.com",
+      projectId: "gerzlngelairsvp",
+      storageBucket: "gerzlngelairsvp.firebasestorage.app",
+      messagingSenderId: "367774281093",
+      appId: "1:367774281093:web:b134d69d29e370c19fe8ec",
+      measurementId: "G-RQH6M218SX"
+    };
+
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
+if (!code) { document.body.textContent = 'Missing code'; throw new Error(); }
+
+const ref = doc(db,'rsvps',code);
+const details = document.getElementById('details');
+const form = document.getElementById('editForm');
+
+async function load() {
+  const snap = await getDoc(ref);
+  if (!snap.exists()) { details.textContent = 'No reply yet.'; return; }
+
+  const updates = snap.data().updates || [];
+  const last = updates.at(-1);
+  // Build updates list
+  details.innerHTML = `<p>Current answer: <b>${last.attending?'Yes':'No'}</b></p>
+      <div class="list"><u>History (max 5)</u><br>${
+        updates.slice().reverse().map(u =>
+          `${u.ts.toDate().toLocaleString()} — ${u.attending?'Yes':'No'}`)
+          .join('<br>')}</div>`;
+  // Pre-select radio
+  form.elements.reply.value = last.attending?'yes':'no';
+  form.style.display = 'block';
+}
+
+form.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const attending = new FormData(form).get('reply') === 'yes';
+  const snap = await getDoc(ref);
+  let updates = snap.exists() ? snap.data().updates : [];
+  updates = updates.slice(-4).concat([{attending, ts: Timestamp.now()}]);
+  await setDoc(ref,{updates},{merge:true});
+  load();            // refresh view
+});
+
+load();
+</script>
+</body></html>
