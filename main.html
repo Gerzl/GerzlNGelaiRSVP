@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RSVP</title>
+
+  <style>
+    body {font-family:system-ui;background:#f6f8fb;
+          display:flex;justify-content:center;align-items:center;height:100vh;margin:0;}
+    .card {background:#fff;padding:2rem 3rem;border-radius:8px;
+           box-shadow:0 2px 8px rgba(0,0,0,.08);max-width:420px;width:100%;}
+    h1   {margin:0 0 1rem;text-align:center;font-size:1.5rem;}
+    input[type=text]{width:100%;padding:.6rem;margin:.4rem 0 .8rem;border:1px solid #ccc;border-radius:4px;}
+    label {font-size:.95rem;}
+    .btn {background:#0066ff;color:#fff;border:none;padding:.7rem 1.6rem;
+          border-radius:4px;font-weight:600;cursor:pointer;width:100%;}
+    .btn:disabled {opacity:.6;cursor:not-allowed;}
+    .success{display:none;text-align:center;color:#2e7d32;font-weight:600;margin-top:1rem;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Will you attend?</h1>
+
+    <form id="rsvpForm">
+      <label>Your name
+        <input id="guestName" type="text" required placeholder="Jane Doe">
+      </label>
+
+      <div style="margin:.6rem 0 1.2rem">
+        <label><input type="radio" name="attendance" value="yes" required> Accept</label>
+        <label style="margin-left:1.2rem"><input type="radio" name="attendance" value="no"  required> Regret</label>
+      </div>
+
+      <button class="btn" type="submit">Submit</button>
+    </form>
+
+    <p id="thanks" class="success">Thanks for letting us know!</p>
+  </div>
+
+  <!-- Firebase v10 modular SDKs straight from the CDN -->
+  <script type="module">
+    import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import {getFirestore, collection, addDoc, serverTimestamp}
+            from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    // 🔧 1) Paste *your* config here
+    const firebaseConfig = {
+      apiKey:       "YOUR_API_KEY",
+      authDomain:   "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:    "YOUR_PROJECT_ID"
+    };
+
+    // 2) Init Firebase + Firestore
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // 3) Handle form submit
+    const form   = document.getElementById("rsvpForm");
+    const thanks = document.getElementById("thanks");
+    const button = form.querySelector("button");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      button.disabled = true;
+
+      try {
+        const name      = document.getElementById("guestName").value.trim();
+        const attending = (new FormData(form)).get("attendance") === "yes";
+
+        await addDoc(collection(db, "rsvps"), {
+          name, attending, submitted: serverTimestamp()
+        });
+
+        form.reset();
+        thanks.style.display = "block";       // success message
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+        console.error(err);
+      }
+      button.disabled = false;
+    });
+  </script>
+</body>
+</html>
