@@ -83,7 +83,14 @@ form.addEventListener('submit',async e=>{
     return;
   }
   updates.push({attending,ts:Timestamp.now()});
-  await setDoc(ref,{updates,seats},{merge:true});      // store seats for reference
+  try {
+  await setDoc(ref, { updates }, { merge: true });   // or {updates, seats}
+  msg.style.display = 'block';
+  setTimeout(() => location.href = `status.html?code=${code}`, 700);
+  } catch (err) {
+    alert('Sorry, we could not save your reply. Please try again.');
+    console.error(err);
+  }
   msg.style.display='block';
   setTimeout(()=>location.href=`status.html?code=${code}`,700);
 });
