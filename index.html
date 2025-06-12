@@ -5,7 +5,7 @@
   <title>RSVP</title>
   <style>
     body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;
-         height:100vh;margin:0;background:#f3f5fa}
+         height:100vh;margin:0;background:#c7bd9b}
     .card{background:#fff;padding:2rem 3rem;border-radius:12px;
           box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center}
     button{margin-top:1rem;padding:.6rem 1.4rem;border:none;border-radius:8px;
@@ -13,6 +13,14 @@
     button:disabled{opacity:.6;cursor:not-allowed}
     .success{color:#208b4c;font-weight:600;margin-top:1rem}
     .error{color:#c7332d;font-weight:600;margin-top:1rem}
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-100px;
+      background:url('images/original_2025-06-12.jpg') center/cover no-repeat;
+      opacity:0.3;
+      z-index:-5;
+    }
   </style>
 </head>
 <body>
