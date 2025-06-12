@@ -1,64 +1,81 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><title>RSVP</title>
-<link rel="stylesheet" href="style.css"><!-- same card CSS as before -->
-</head><body>
-<div class="card">
-  <h1>Please respond</h1>
-  <form id="form">
-    <div style="margin:1rem 0">
-      <label><input type="radio" name="reply" value="yes" required> Yes</label>
-      <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no" required> No</label>
-    </div>
-    <button class="btn" type="submit">Submit</button>
-  </form>
-  <p id="msg" class="success">Saved — redirecting…</p>
-</div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RSVP</title>
 
+  <!-- Inter font & theme -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Please respond</h1>
+
+    <form id="form">
+      <div style="margin:1rem 0">
+        <label><input type="radio" name="reply" value="yes" required> Yes</label>
+        <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no"  required> No</label>
+      </div>
+      <button class="btn" type="submit">Submit</button>
+    </form>
+
+    <p id="msg" class="success">Saved — redirecting…</p>
+  </div>
+
+<!-- Firebase SDKs -->
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import {getFirestore, doc, getDoc, setDoc, Timestamp}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, Timestamp }
         from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-const firebaseConfig = {
-      apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
-      authDomain: "gerzlngelairsvp.firebaseapp.com",
-      projectId: "gerzlngelairsvp",
-      storageBucket: "gerzlngelairsvp.firebasestorage.app",
-      messagingSenderId: "367774281093",
-      appId: "1:367774281093:web:b134d69d29e370c19fe8ec",
-      measurementId: "G-RQH6M218SX"
-    };
-
-/* 🔧 your keys */ const app = initializeApp(firebaseConfig);
+/* 🔧 YOUR PROJECT KEYS */
+const app = initializeApp({
+  apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
+  authDomain: "gerzlngelairsvp.firebaseapp.com",
+  projectId: "gerzlngelairsvp",
+  storageBucket: "gerzlngelairsvp.firebasestorage.app",
+  messagingSenderId: "367774281093",
+  appId: "1:367774281093:web:b134d69d29e370c19fe8ec",
+  measurementId: "G-RQH6M218SX"
+});
 const db = getFirestore(app);
 
-/* ----- grab code from URL ----- */
+/* ── Pull ?code=ABC123 from the URL ─────────────────────────────── */
 const params = new URLSearchParams(location.search);
 const code   = params.get('code')?.toUpperCase();
 if (!code || code.length !== 6) {
   document.querySelector('.card').innerHTML =
-    "<p>Invalid or missing invite code in the link.</p>";
-  throw new Error("No code");
+    "<p class=error>Invalid or missing invite code in the link.</p>";
+  throw new Error("Missing code");
 }
 
-/* ----- submit handler ----- */
-document.getElementById('form').addEventListener('submit', async e => {
+/* ── Form submit ────────────────────────────────────────────────── */
+const form = document.getElementById('form');
+const msg  = document.getElementById('msg');
+
+form.addEventListener('submit', async e => {
   e.preventDefault();
-  const attending = new FormData(e.target).get('reply') === 'yes';
+  const attending = new FormData(form).get('reply') === 'yes';
   const ref  = doc(db,'rsvps',code);
   const snap = await getDoc(ref);
-  let updates = snap.exists() ? snap.data().updates || [] : [];
+  let updates = snap.exists() ? (snap.data().updates || []) : [];
 
-  if (updates.length >= 5) {                     // 🔒 cap hit
-    alert('You have reached the 5-change limit. Contact the couple for help.');
+  /* Cap at 5 total submissions */
+  if (updates.length >= 5) {
+    alert('Edit limit reached (5 changes). Contact the couple.');
     location.href = `status.html?code=${code}`;
     return;
   }
 
-  updates.push({attending, ts: Timestamp.now()});
-  await setDoc(ref,{updates},{merge:true});
-  document.getElementById('msg').style.display='block';
-  setTimeout(()=>location.href=`status.html?code=${code}`,600);
+  updates.push({ attending, ts: Timestamp.now() });
+  await setDoc(ref, { updates }, { merge:true });
+
+  msg.style.display = 'block';
+  setTimeout(()=>location.href=`status.html?code=${code}`, 700);
 });
 </script>
-</body></html>
+</body>
+</html>
