@@ -28,19 +28,47 @@ body{
 body::before{
   content:"";
   position:fixed; inset:0;
-  background:url('images/original_2025-06-12.jpg') center/cover no-repeat;
+  background:url('images/original_2025-06-12\ copy.jpg') center/cover no-repeat;
   opacity:.35;
   filter:grayscale(.2);
   z-index:-5;
 }
 
+/* === Floral frame (second overlay) ====================== */
+body::after{
+  content:"";
+  position:fixed;
+  inset:-200px;
+  pointer-events:none;                 /* so you can click through */
+  background:url('images/Flowers.png') center/ contain no-repeat;
+  z-index:-3;                          /* between blurred photo (-5) and content (0) */
+  opacity:1;                           /* keep it crisp */
+}
+
+/* ─── Middle torn banner ─────────────────────────────────── */
+.mid-band{
+  position:fixed;                 /* stay put on scroll */
+  top:20%; left:50%;
+  transform:translate(-50%,-50%); /* perfect centering */
+  width:max(120vw, 100%, 1600px);                    /* stretch edge-to-edge */
+  max-width:none;
+  pointer-events:none;            /* clicks pass through */
+  z-index:-2;                     /* sits above floral frame (-3) */
+}
+
+/* optional: shrink on very narrow phones */
+@media(max-width:480px){
+  .mid-band{width:140vw;}         /* a little overscan so edges still show */
+}
+
+
 /* ─── Fancy names heading ─────────────────────────────────── */
 h1{
   font-family:var(--font-head);
-  font-size:5rem;
+  font-size:8rem;
   line-height:1.1;
-  color:#052694;
-  -webkit-text-stroke:.7px #020824;
+  color:#c8cee4;
+  -webkit-text-stroke:.7px #b7e3ee;
   letter-spacing:.5px;
   text-shadow:0 4px 8px rgba(0,0,0,.3);
   margin-bottom:2.5rem;
@@ -62,6 +90,8 @@ h1{
   backdrop-filter:blur(var(--blur-card));
   box-shadow:0 12px 24px rgba(0,0,0,.15);
   opacity: 0.65;
+  color: #2733df;
+  background-color: #cad2e7;
 }
 
 .card h2{

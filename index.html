@@ -10,24 +10,28 @@
   <link rel="stylesheet" href="responsive-clock.css"><!-- your mobile tweaks -->
 </head>
 <body>
-  <h1>Khristian <br> & <br> Angelica </h1>
+  <img class="mid-band"
+     src="images/KhristianAndAngelica.png"
+     alt=""
+     aria-hidden="true">
+  <!-- <img class="title-img"
+     src="images/KhristianAndAngelica.png"
+     alt="Khristian and Angelica"> -->
   <div class="card">
     <h2>Will you attend?</h2>
 
     <form id="rsvpForm">
       <label class="toggle">
-  <input id="rsvpToggle" type="checkbox">
-  <span class="track">
-    <span class="txt yes">YES</span>
-    <span class="txt no">NO</span>
-    <span class="thumb"></span>
-  </span>
-</label>
-
+        <input id="rsvpToggle" type="checkbox">
+        <span class="track">
+          <span class="txt yes">YES</span>
+          <span class="txt no">NO</span>
+          <span class="thumb"></span>
+        </span>
+      </label>
       <!-- ✓ button now INSIDE the form -->
       <button class="btn" type="submit">Submit</button>
     </form>
-    <!-- <button type="submit">Submit</button> -->
 
     <p id="msg" class="success" style="display:none">Thanks — saved!</p>
     <p id="err" class="error" style="display:none">Error — please try again.</p>
@@ -65,10 +69,10 @@ const db = getFirestore(app);
 
 /* --- invite code from URL --------------------------------------- */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-// if (!code || code.length !== 6) {
-//   document.body.innerHTML = '<p style="font-size:50px">Bad invite link.</p>';
-//   throw new Error('Missing code');
-// }
+if (!code || code.length !== 6) {
+  document.body.innerHTML = '<p style="font-size:50px">Bad invite link.</p>';
+  throw new Error('Missing code');
+}
 
 /* --- form handler ----------------------------------------------- */
 const form = document.getElementById('rsvpForm');
