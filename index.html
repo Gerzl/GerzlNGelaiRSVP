@@ -3,38 +3,43 @@
 <head>
   <meta charset="utf-8">
   <title>RSVP</title>
-  <style>
-    body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;
-         height:100vh;margin:0;background:#c7bd9b}
-    .card{background:#fff;padding:2rem 3rem;border-radius:12px;
-          box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center}
-    button{margin-top:1rem;padding:.6rem 1.4rem;border:none;border-radius:8px;
-           background:#2563eb;color:#fff;font-weight:600;cursor:pointer}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .success{color:#208b4c;font-weight:600;margin-top:1rem}
-    .error{color:#c7332d;font-weight:600;margin-top:1rem}
-    body::before{
-      content:"";
-      position:fixed;
-      inset:-100px;
-      background:url('images/original_2025-06-12.jpg') center/cover no-repeat;
-      opacity:0.3;
-      z-index:-5;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css">
+  <link rel="stylesheet" href="responsive-clock.css"><!-- your mobile tweaks -->
 </head>
 <body>
+  <h1>Khristian <br> & <br> Angelica </h1>
   <div class="card">
-    <h1>Will you attend?</h1>
+    <h2>Will you attend?</h2>
 
     <form id="rsvpForm">
       <label><input type="radio" name="answer" value="yes" required> Yes</label>
-      <label style="margin-left:1.5rem"><input type="radio" name="answer" value="no" required> No</label>
-      <button type="submit">Submit</button>
+      <label style="margin-left:1.5rem">
+        <input type="radio" name="answer" value="no" required> No
+      </label>
+
+      <!-- ✓ button now INSIDE the form -->
+      <button class="btn" type="submit">Submit</button>
     </form>
+    <!-- <button type="submit">Submit</button> -->
 
     <p id="msg" class="success" style="display:none">Thanks — saved!</p>
     <p id="err" class="error" style="display:none">Error — please try again.</p>
+  </div>
+
+  <div id="countdown">
+    <div class="section"><span class="number" id="d">0</span><span class="lab">Days</span></div>
+    <div class="colon">:</div>
+
+    <div class="section"><span class="number" id="h">00</span><span class="lab">Hours</span></div>
+    <div class="colon">:</div>
+
+    <div class="section"><span class="number" id="m">00</span><span class="lab">Minutes</span></div>
+    <div class="colon">:</div>
+
+    <div class="section"><span class="number" id="s">00</span><span class="lab">Seconds</span></div>
   </div>
 
 <script type="module">
@@ -57,7 +62,7 @@ const db = getFirestore(app);
 /* --- invite code from URL --------------------------------------- */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
 if (!code || code.length !== 6) {
-  document.body.innerHTML = '<p style="color:red">Bad invite link.</p>';
+  document.body.innerHTML = '<p style="font-size:50px">Bad invite link.</p>';
   throw new Error('Missing code');
 }
 
@@ -86,5 +91,37 @@ form.addEventListener('submit', async e => {
   }
 });
 </script>
+<script>
+(() => {
+  /* target: 9 Sep 2025 14:00 local browser time */
+  const target = new Date('2025-09-09T14:00:00');
+
+  const el = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s')
+  };
+
+  function tick(){
+    const now   = new Date();
+    let diffSec = Math.max(0, Math.floor((target - now) / 1000));
+
+    const d = Math.floor(diffSec / 86400); diffSec %= 86400;
+    const h = Math.floor(diffSec / 3600);  diffSec %= 3600;
+    const m = Math.floor(diffSec / 60);
+    const s = diffSec % 60;
+
+    el.d.textContent = d;
+    el.h.textContent = h.toString().padStart(2,'0');
+    el.m.textContent = m.toString().padStart(2,'0');
+    el.s.textContent = s.toString().padStart(2,'0');
+  }
+
+  tick();                   // initial paint
+  setInterval(tick,1000);   // update every second
+})();
+</script>
+
 </body>
 </html>
