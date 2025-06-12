@@ -15,10 +15,14 @@
     <h2>Will you attend?</h2>
 
     <form id="rsvpForm">
-      <label><input type="radio" name="answer" value="yes" required> Yes</label>
-      <label style="margin-left:1.5rem">
-        <input type="radio" name="answer" value="no" required> No
-      </label>
+      <label class="toggle">
+  <input id="rsvpToggle" type="checkbox">
+  <span class="track">
+    <span class="txt yes">YES</span>
+    <span class="txt no">NO</span>
+    <span class="thumb"></span>
+  </span>
+</label>
 
       <!-- ✓ button now INSIDE the form -->
       <button class="btn" type="submit">Submit</button>
@@ -61,10 +65,10 @@ const db = getFirestore(app);
 
 /* --- invite code from URL --------------------------------------- */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code || code.length !== 6) {
-  document.body.innerHTML = '<p style="font-size:50px">Bad invite link.</p>';
-  throw new Error('Missing code');
-}
+// if (!code || code.length !== 6) {
+//   document.body.innerHTML = '<p style="font-size:50px">Bad invite link.</p>';
+//   throw new Error('Missing code');
+// }
 
 /* --- form handler ----------------------------------------------- */
 const form = document.getElementById('rsvpForm');

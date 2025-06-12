@@ -126,3 +126,56 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
   #countdown .colon{font-size:2.3rem;}
   #countdown{gap:10px;}
 }
+
+/* ─── Toggle slider ───────────────────────────────────── */
+.toggle{
+  display:inline-block;
+  cursor:pointer;
+  user-select:none;
+}
+.toggle input{         /* hide the raw checkbox */
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.toggle .track{
+  position:relative;
+  width:160px;   /* overall length */
+  height:56px;   /* overall height */
+  border-radius:56px;
+  background:#7d7d7d;     /* default gray (No) */
+  transition:background .25s;
+  display:flex;
+  align-items:center;
+  padding:0 8px;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.25);
+}
+.toggle .thumb{
+  position:absolute;
+  width:52px;height:52px;
+  border-radius:50%;
+  background:#fff;
+  left:4px; top:2px;
+  transition:left .25s;
+  box-shadow:0 3px 5px rgba(0,0,0,.25);
+}
+.toggle .txt{
+  flex:1;
+  font:700 1.1rem/1 var(--font-base, 'Inter', sans-serif);
+  color:#fff;
+  text-align:center;
+  pointer-events:none;
+  opacity:.0;
+  transition:opacity .25s;
+}
+.toggle .yes{order:-1;}          /* YES text left, NO right */
+
+/* ─── Checked state ──────────────────────────────────── */
+.toggle input:checked + .track{
+  background:#28b64e;            /* green background */
+}
+.toggle input:checked + .track .thumb{
+  left:104px;                    /* slide to the right */
+}
+.toggle input:checked + .track .yes{opacity:1;}
+.toggle input:not(:checked) + .track .no{opacity:1;}
