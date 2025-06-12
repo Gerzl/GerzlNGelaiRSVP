@@ -1,35 +1,39 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>RSVP status</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"><title>RSVP status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="card">
-    <h1>Your response</h1>
-    <div id="details"></div>
+<div class="card">
 
-    <form id="editForm" style="display:none">
-      <div style="margin:1rem 0">
-        <label><input type="radio" name="reply" value="yes"> Yes</label>
-        <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no"> No</label>
-      </div>
-      <button class="btn" type="submit">Update</button>
-    </form>
-  </div>
+  <!-- Invitation -->
+  <img src="images/A_Wedding_Inv.png" alt="Invitation" class="img-full">
 
-<!-- Firebase SDKs -->
+  <!-- Seat-specific card -->
+  <img id="rsvpImg" class="img-full" alt="RSVP card" style="display:none">
+
+  <h1>Your response</h1>
+  <div id="details"></div>
+
+  <form id="editForm" style="display:none">
+    <div style="margin:1rem 0">
+      <label><input type="radio" name="reply" value="yes"> Yes</label>
+      <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no"> No</label>
+    </div>
+    <button class="btn" type="submit">Update</button>
+  </form>
+</div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, Timestamp }
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import {getFirestore, doc, getDoc, setDoc, Timestamp}
         from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-/* 🔧 YOUR PROJECT KEYS */
+/* 🔧 YOUR KEYS */
 const app = initializeApp({
   apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
   authDomain: "gerzlngelairsvp.firebaseapp.com",
@@ -41,68 +45,67 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-/* ── grab code ──────────────────────────────────────────────────── */
-const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code) { document.body.innerHTML='<p class=error>Missing code.</p>'; throw new Error(); }
+/* code */
+const code=new URLSearchParams(location.search).get('code')?.toUpperCase();
+if(!code){document.body.innerHTML='<p class=error>Missing code.</p>';throw new Error();}
 
-const ref      = doc(db,'rsvps',code);
-const details  = document.getElementById('details');
-const form     = document.getElementById('editForm');
-const radioYes = form.querySelector('input[value=yes]');
-const radioNo  = form.querySelector('input[value=no]');
+const ref=doc(db,'rsvps',code);
+const details=document.getElementById('details');
+const form=document.getElementById('editForm');
+const radioYes=form.querySelector('input[value=yes]');
+const radioNo =form.querySelector('input[value=no]');
+const rsvpImg=document.getElementById('rsvpImg');
 
-/* ── fetch + render ─────────────────────────────────────────────── */
-async function load() {
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    details.innerHTML = '<p>No reply yet.</p>';
-    form.style.display = 'none';
+/* first: fetch seat count from invites (or rsvps fallback) */
+(async ()=>{
+  let seats=1;
+  const metaSnap=await getDoc(doc(db,'invites',code));
+  if(metaSnap.exists()) seats=metaSnap.data().seats||1;
+  else{
+    const snap=await getDoc(ref);
+    if(snap.exists()) seats=snap.data().seats||1;
+  }
+  seats=Math.max(1,Math.min(5,seats));
+  rsvpImg.src=`images/C_RSVP_${seats}.png`;
+  rsvpImg.style.display='block';
+})();
+
+/* load & render history --------------------------------------------------- */
+async function load(){
+  const snap=await getDoc(ref);
+  if(!snap.exists()){
+    details.innerHTML='<p>No reply yet.</p>';
+    form.style.display='none';
     return;
   }
-
-  const updates = snap.data().updates || [];
-  const last    = updates.at(-1);
-
-  /* Build history list */
-  details.innerHTML = `
+  const updates=snap.data().updates||[];
+  const last=updates.at(-1);
+  details.innerHTML=`
     <p>Current answer: <b>${last.attending?'Yes':'No'}</b></p>
     <div class="list"><u>History (max 5)</u><br>${
-      updates.slice().reverse().map(u =>
-        `${u.ts.toDate().toLocaleString()} — ${u.attending?'Yes':'No'}`)
-      .join('<br>')}</div>
-  `;
+      updates.slice().reverse().map(u=>
+        `${u.ts.toDate().toLocaleString()} — ${u.attending?'Yes':'No'}`).join('<br>')
+    }</div>`;
+  radioYes.checked=last.attending; radioNo.checked=!last.attending;
+  form.style.display='block';
 
-  /* Pre-select radio & show form */
-  radioYes.checked = last.attending;
-  radioNo.checked  = !last.attending;
-  form.style.display = 'block';
-
-  /* If already 5 entries, lock the form */
-  if (updates.length >= 5) {
-    form.style.display = 'none';
-    details.innerHTML += '<p class="error">Edit limit reached (5 changes).</p>';
+  if(updates.length>=5){
+    form.style.display='none';
+    details.innerHTML+='<p class="error">Edit limit reached (5 changes).</p>';
   }
 }
-
 load();
 
-/* ── update submit ─────────────────────────────────────────────── */
-form.addEventListener('submit', async e => {
+/* update submit ----------------------------------------------------------- */
+form.addEventListener('submit',async e=>{
   e.preventDefault();
-  const attending = new FormData(form).get('reply') === 'yes';
-
-  const snap = await getDoc(ref);
-  let updates = snap.exists() ? (snap.data().updates || []) : [];
-
-  if (updates.length >= 5) {          // guard in case of race
-    alert('Edit limit reached.');
-    load();
-    return;
-  }
-
-  updates.push({attending, ts: Timestamp.now()});
+  const attending=new FormData(form).get('reply')==='yes';
+  const snap=await getDoc(ref);
+  let updates=snap.exists()?snap.data().updates||[]:[];
+  if(updates.length>=5){alert('Limit reached.');load();return;}
+  updates.push({attending,ts:Timestamp.now()});
   await setDoc(ref,{updates},{merge:true});
-  await load();
+  load();
 });
 </script>
 </body>
