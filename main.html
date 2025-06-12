@@ -45,18 +45,20 @@ if (!code || code.length !== 6) {
 document.getElementById('form').addEventListener('submit', async e => {
   e.preventDefault();
   const attending = new FormData(e.target).get('reply') === 'yes';
-  const ref = doc(db, 'rsvps', code);
+  const ref  = doc(db,'rsvps',code);
   const snap = await getDoc(ref);
-  let updates = [];
+  let updates = snap.exists() ? snap.data().updates || [] : [];
 
-  if (snap.exists()) updates = snap.data().updates || [];
+  if (updates.length >= 5) {                     // 🔒 cap hit
+    alert('You have reached the 5-change limit. Contact the couple for help.');
+    location.href = `status.html?code=${code}`;
+    return;
+  }
 
-  // keep last 4, then push new entry
-  updates = updates.slice(-4).concat([{attending, ts: Timestamp.now()}]);
-
-  await setDoc(ref, {updates}, {merge: true});   // create or update
-  document.getElementById('msg').style.display = 'block';
-  setTimeout(() => location.href = `status.html?code=${code}`, 600);
+  updates.push({attending, ts: Timestamp.now()});
+  await setDoc(ref,{updates},{merge:true});
+  document.getElementById('msg').style.display='block';
+  setTimeout(()=>location.href=`status.html?code=${code}`,600);
 });
 </script>
 </body></html>

@@ -55,12 +55,22 @@ async function load() {
           `${u.ts.toDate().toLocaleString()} — ${u.attending?'Yes':'No'}`)
           .join('<br>')}</div>`;
   // Pre-select radio
+  // If 5 updates already, lock the form
+  if (updates.length >= 5) {
+    form.style.display = 'none';
+    details.innerHTML += '<p class="error">Edit limit reached (5 changes).</p>';
+    return;            // 👈 stop here
+  }
   form.elements.reply.value = last.attending?'yes':'no';
   form.style.display = 'block';
 }
 
 form.addEventListener('submit', async e=>{
   e.preventDefault();
+  if (updates.length >= 5) {               // guard in case of race
+    alert('Edit limit reached.');
+    return;
+  }
   const attending = new FormData(form).get('reply') === 'yes';
   const snap = await getDoc(ref);
   let updates = snap.exists() ? snap.data().updates : [];

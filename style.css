@@ -1,0 +1,54 @@
+/* === Base reset === */
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* === Page background === */
+body{
+  font-family:'Inter',system-ui,Arial,sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#f0f4ff 0%,#e1edff 50%,#f8f9ff 100%);
+  color:#333;
+}
+
+/* === Card === */
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:2.5rem clamp(2rem,5vw,3rem);
+  box-shadow:0 12px 24px rgba(0,0,0,.06);
+  width:clamp(320px,90vw,420px);
+}
+
+/* === Headings === */
+h1{
+  font-size:1.8rem;
+  margin-bottom:1.5rem;
+  text-align:center;
+  color:#212121;
+}
+
+/* === Form controls === */
+input[type=radio]{accent-color:#2563eb}
+label{font-size:1.05rem;font-weight:500;cursor:pointer}
+
+/* === Buttons === */
+.btn{
+  display:block;width:100%;
+  margin-top:1rem;padding:.8rem 1.2rem;
+  border:none;border-radius:8px;
+  background:#2563eb;color:#fff;
+  font-weight:600;font-size:1rem;
+  cursor:pointer;transition:background .2s ease;
+}
+.btn:hover:not([disabled]){background:#1e4fd6}
+.btn:disabled{cursor:not-allowed;opacity:.6}
+
+/* === Messages & history === */
+.success,.error{margin-top:1rem;text-align:center;font-weight:600}
+.success{color:#0b8b4c}.error{color:#ca3129}
+.list{
+  background:#f9fafb;padding:1rem;border-radius:8px;
+  font-size:.95rem;line-height:1.35
+}
