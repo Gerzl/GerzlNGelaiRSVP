@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>RSVP</title>
 
-  <!-- fonts & theme -->
+  <!-- fonts & shared CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -13,26 +13,32 @@
 <body>
   <div class="card">
 
-    <!-- Decorative invitation (static image) -->
-    <img src="images/A_Wedding_Inv.png" alt="Wedding invitation" class="img-full">
+    <!-- Decorative invitation -->
+    <img src="images/A_Wedding_Inv.png"
+         alt="Wedding invitation"
+         class="img-block">
 
-    <!-- Seat-specific RSVP card swaps in once we know the seat count -->
-    <img id="rsvpImg" class="img-full" alt="RSVP card showing reserved seats" style="display:none">
+    <!-- Seat-specific RSVP card (swapped in via JS) -->
+    <img id="rsvpImg"
+         alt="RSVP card showing seats reserved"
+         class="img-block"
+         style="display:none">
 
     <h1>Please respond</h1>
 
     <form id="form">
       <div style="margin:1rem 0">
         <label><input type="radio" name="reply" value="yes" required> Yes</label>
-        <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no" required> No</label>
+        <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no"  required> No</label>
       </div>
       <button class="btn" type="submit">Submit</button>
     </form>
 
-    <p id="msg" class="success">Saved — redirecting…</p>
+    <p id="msg" class="success" style="display:none">Saved — redirecting…</p>
+    <p id="err" class="error"  style="display:none">Couldn’t save. Try again?</p>
   </div>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import {getFirestore, doc, getDoc, setDoc, Timestamp}
@@ -50,49 +56,60 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-/* ── pull invite code from URL ── */
+/* ── extract code from URL ───────────────────────────────── */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code || code.length!==6){
-  document.querySelector('.card').innerHTML='<p class=error>Bad link — missing invite code.</p>';
-  throw new Error();
+if (!code || code.length !== 6) {
+  document.querySelector('.card').innerHTML =
+    '<p class="error">Bad link — missing invite code.</p>';
+  throw new Error('Missing code');
 }
 
-/* ── look up seat count ─────────────────────────────────────────── */
-let seats = 1;                                                // default
-try{
+/* ── look up seat count & show correct card ─────────────── */
+let seats = 1;
+try {
   const metaSnap = await getDoc(doc(db,'invites',code));
-  if (metaSnap.exists()) seats = Math.max(1, Math.min(5, metaSnap.data().seats||1));
-}catch(e){console.warn('No invite metadata for',code)}
-
-/* show the correct image */
+  if (metaSnap.exists()) seats = Math.max(1, Math.min(5, metaSnap.data().seats || 1));
+} catch(err) {
+  console.error('Seat lookup failed:', err);
+}
 const rsvpImg = document.getElementById('rsvpImg');
 rsvpImg.src   = `images/C_RSVP_${seats}.png`;
-rsvpImg.style.display='block';
+rsvpImg.style.display = 'block';
 
-/* ── handle form submit ─────────────────────────────────────────── */
-const form=document.getElementById('form'), msg=document.getElementById('msg');
-form.addEventListener('submit',async e=>{
+/* ── handle submission ──────────────────────────────────── */
+const form = document.getElementById('form');
+const msg  = document.getElementById('msg');
+const errP = document.getElementById('err');
+
+form.addEventListener('submit', async e => {
   e.preventDefault();
-  const attending=new FormData(form).get('reply')==='yes';
-  const ref=doc(db,'rsvps',code);
-  const snap=await getDoc(ref);
-  let updates=snap.exists()?snap.data().updates||[]:[];
-  if(updates.length>=5){
-    alert('Edit limit reached (5).');
-    location.href=`status.html?code=${code}`;
-    return;
-  }
-  updates.push({attending,ts:Timestamp.now()});
+  errP.style.display = 'none';
+
+  /* current choice */
+  const attending = new FormData(form).get('reply') === 'yes';
+
+  /* read-modify-write cycle */
   try {
-  await setDoc(ref, { updates }, { merge: true });   // or {updates, seats}
-  msg.style.display = 'block';
-  setTimeout(() => location.href = `status.html?code=${code}`, 700);
+    const ref  = doc(db,'rsvps',code);
+    const snap = await getDoc(ref);
+    let updates = snap.exists() ? (snap.data().updates || []) : [];
+
+    if (updates.length >= 5) {
+      alert('Edit limit reached (5 changes).');
+      location.href = `status.html?code=${code}`;
+      return;
+    }
+
+    updates.push({attending, ts: Timestamp.now()});
+    await setDoc(ref, {updates}, {merge:true});      // ⬅︎ no seats field
+
+    msg.style.display = 'block';
+    setTimeout(() => location.href=`status.html?code=${code}`, 700);
+
   } catch (err) {
-    alert('Sorry, we could not save your reply. Please try again.');
     console.error(err);
+    errP.style.display = 'block';
   }
-  msg.style.display='block';
-  setTimeout(()=>location.href=`status.html?code=${code}`,700);
 });
 </script>
 </body>
