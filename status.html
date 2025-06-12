@@ -4,22 +4,26 @@
 <meta charset="utf-8">
 <title>RSVP status</title>
 
+<link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="card">
-
   <h1>Your response</h1>
   <div id="details"></div>
 
+  <!-- editable slider -->
   <form id="editForm" style="display:none">
-    <div style="margin:1rem 0">
-      <label><input type="radio" name="reply" value="yes"> Yes</label>
-      <label style="margin-left:1.5rem"><input type="radio" name="reply" value="no"> No</label>
-    </div>
+    <label class="toggle">
+      <input id="editToggle" type="checkbox">
+      <span class="track">
+        <span class="txt yes">YES</span>
+        <span class="txt no">NO</span>
+        <span class="thumb"></span>
+      </span>
+    </label>
     <button class="btn" type="submit">Update</button>
   </form>
 
@@ -31,106 +35,57 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase
 import {getFirestore, doc, getDoc, setDoc, Timestamp}
         from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-/* 🔧 YOUR KEYS */
 const app = initializeApp({
   apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
   authDomain: "gerzlngelairsvp.firebaseapp.com",
-  projectId: "gerzlngelairsvp",
-  storageBucket: "gerzlngelairsvp.firebasestorage.app",
-  messagingSenderId: "367774281093",
-  appId: "1:367774281093:web:b134d69d29e370c19fe8ec",
-  measurementId: "G-RQH6M218SX"
+  projectId:  "gerzlngelairsvp"
 });
 const db = getFirestore(app);
 
-/* ---------- helpers ---------- */
+/* invite code */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code) { document.body.innerHTML='<p class="error">Missing invite code.</p>'; throw new Error(); }
+if(!code){document.body.innerHTML='<p class="error">Missing code</p>';throw new Error();}
 
-const rsvpRef   = doc(db,'rsvps',code);
-const inviteRef = doc(db,'invites',code);
+const rsvpRef = doc(db,'rsvps',code);
 
-const rsvpImg  = document.getElementById('rsvpImg');
-const details  = document.getElementById('details');
-const form     = document.getElementById('editForm');
-const radioYes = form.querySelector('input[value=yes]');
-const radioNo  = form.querySelector('input[value=no]');
-const errP     = document.getElementById('err');
+const details = document.getElementById('details');
+const form    = document.getElementById('editForm');
+const toggle  = document.getElementById('editToggle');
+const errP    = document.getElementById('err');
 
-/* ---------- seat card ---------- */
-(async ()=>{
-  try{
-    let seats = 1;
-    const metaSnap = await getDoc(inviteRef);
-    if (metaSnap.exists()) seats = Math.max(1,Math.min(5,metaSnap.data().seats||1));
-    rsvpImg.src = `images/C_RSVP_${seats}.png`;
-    rsvpImg.style.display='block';
-  }catch(err){console.error('Seat lookup failed',err);}
-})();
-
-/* ---------- load RSVPs ---------- */
-async function load() {
-  try {
-    const snap = await getDoc(rsvpRef);
-    if (!snap.exists()) {
-      details.innerHTML = '<p>No reply yet.</p>';
-      form.style.display = 'block';               // allow first reply
-      radioYes.checked = radioNo.checked = false;
-      return;
-    }
-
-    const updates = snap.data().updates || [];
-    if (updates.length === 0) {
-      details.innerHTML = '<p>No reply yet.</p>';
-      form.style.display = 'block';
-      radioYes.checked = radioNo.checked = false;
-      return;
-    }
-
-    const last = updates.at(-1);
-
-    details.innerHTML = `
-      <p>Current answer: <b>${last.attending ? 'Yes' : 'No'}</b></p>
-      <div class="list"><u>History (max 5)</u><br>${
-        updates.slice().reverse().map(u =>
-          `${u.ts.toDate().toLocaleString()} — ${u.attending ? 'Yes' : 'No'}`).join('<br>')
-      }</div>
-    `;
-
-    radioYes.checked = last.attending;
-    radioNo.checked  = !last.attending;
-    form.style.display = updates.length >= 5 ? 'none' : 'block';
-
-    if (updates.length >= 5) {
-      details.innerHTML += '<p class="error">Edit limit reached (5 changes).</p>';
-    }
-
-  } catch(err) {
-    console.error(err);
-    details.innerHTML = '<p class="error">Could not load your reply.</p>';
+/* load & display ------------------------------------------------ */
+async function load(){
+  const snap = await getDoc(rsvpRef);
+  if(!snap.exists()){
+    details.textContent='No reply yet.'; form.style.display='block';
+    toggle.checked=false; return;
   }
+  const updates = snap.data().updates || [];
+  const last = updates.length ? updates.at(-1) : {attending:false};
+  details.innerHTML = `
+    <p>Current answer: <b>${last.attending?'Yes':'No'}</b></p>
+    <div class="list"><u>History (max 5)</u><br>${
+      updates.slice().reverse().map(x=>
+        `${x.ts.toDate().toLocaleString()} — ${x.attending?'Yes':'No'}`).join('<br>')}
+    </div>`;
+  toggle.checked = last.attending;
+  form.style.display = updates.length>=5 ? 'none':'block';
+  if(updates.length>=5) details.innerHTML +=
+     '<p class="error">Edit limit reached (5).</p>';
 }
 load();
 
-/* ---------- update handler ---------- */
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  errP.style.display='none';
-
-  try {
-    const attending = new FormData(form).get('reply') === 'yes';
+/* update -------------------------------------------------------- */
+form.addEventListener('submit',async e=>{
+  e.preventDefault(); errP.style.display='none';
+  try{
     const snap = await getDoc(rsvpRef);
-    let updates = snap.exists() ? (snap.data().updates || []) : [];
-
-    if (updates.length >= 5) { load(); return; }   // extra guard
-    updates.push({attending, ts: Timestamp.now()});
+    let updates = snap.exists()?snap.data().updates||[]:[];
+    if(updates.length>=5){load();return;}
+    updates.push({attending:toggle.checked, ts: Timestamp.now()});
     await setDoc(rsvpRef,{updates},{merge:true});
-    await load();
-
-  } catch(err){
-    console.error(err);
-    errP.style.display='block';
-  }
+    load();
+  }catch(err){console.error(err); errP.style.display='block';}
 });
 </script>
 </body>

@@ -48,7 +48,7 @@ body::after{
 /* ─── Middle torn banner ─────────────────────────────────── */
 .mid-band{
   position:fixed;                 /* stay put on scroll */
-  top:20%; left:50%;
+  top:25%; left:50%;
   transform:translate(-50%,-50%); /* perfect centering */
   width:max(120vw, 100%, 1600px);                    /* stretch edge-to-edge */
   max-width:none;
@@ -209,3 +209,4 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
 }
 .toggle input:checked + .track .yes{opacity:1;}
 .toggle input:not(:checked) + .track .no{opacity:1;}
+
