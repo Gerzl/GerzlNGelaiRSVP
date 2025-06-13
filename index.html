@@ -37,10 +37,8 @@
       <button class="btn" type="submit">Submit</button>
     </form>
 
-    <p id="msg" class="success" style="display:none">Thanks — saved!</p>
-    <p id="err" class="error" style="display:none">Error — please try again.</p>
-  </div>
 
+  </div>
   <div id="countdown">
     <div class="section"><span class="number" id="d">0</span><span class="lab">Days</span></div>
     <div class="colon">:</div>
@@ -53,7 +51,9 @@
 
     <div class="section"><span class="number" id="s">00</span><span class="lab">Seconds</span></div>
   </div>
-
+  <h3>Until the wedding</h3>
+  <p id="err" class="error" style="display:none">Error — please try again.</p>
+  <p id="msg" class="success" style="display:none"></p>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore, doc, setDoc, serverTimestamp }
@@ -68,10 +68,10 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-// if (!code || code.length !== 6){
-//   document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
-//   throw new Error();
-// }
+if (!code || code.length !== 6){
+  document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
+  throw new Error();
+}
 
 /* --- form handler ----------------------------------------------- */
 const form  = document.getElementById('rsvpForm');
@@ -80,18 +80,30 @@ const errP  = document.getElementById('err');
 const toggle= document.getElementById('rsvpToggle');
 
 
-form.addEventListener('submit', async e=>{
+form.addEventListener('submit', async e => {
   e.preventDefault();
-  errP.style.display='none';
+  errP.style.display = 'none';
 
-  const attending = toggle.checked;
+  const attending = toggle.checked;   // true = YES, false = NO
+  const ref = doc(db,'rsvps',code);
+
   try{
-    await setDoc(doc(db,'rsvps',code), {attending, ts: serverTimestamp()});
-    msg.style.display='block'; form.style.display='none';
+    await setDoc(ref,{attending, ts: serverTimestamp()});
+
+    // 🟢 friendly feedback
+    msg.textContent = attending
+      ? "Wonderful—your seat is reserved! We can’t wait to celebrate with you."
+      : "We’ll miss you, but thank you for letting us know. ♥";
+    msg.style.display = 'block';
+
+    form.style.display = 'none';      // hide the slider & button
+
   }catch(err){
-    console.error(err); errP.style.display='block';
+    console.error(err);
+    errP.style.display = 'block';
   }
 });
+
 </script>
 <script>
 (() => {

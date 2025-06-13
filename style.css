@@ -1,8 +1,8 @@
 /* ─── Variables ───────────────────────────────────────────── */
 :root{
   --accent:      #2563eb;          /* royal-blue accent */
-  --accent-dark: #1e4fd6;
-  --fg-card:     #ffffffd1;
+  --accent-dark: #91b8c5;
+  --fg-card:     #b6cadb9f;
   --blur-card:   20px;
   --font-head:   'Great Vibes', cursive;
   --font-base:   'Inter', system-ui, Arial, sans-serif;
@@ -91,23 +91,22 @@ body::after{
   padding:2.5rem 2rem;
   border-radius:42px;
   background:var(--fg-card);
-  backdrop-filter:blur(var(--blur-card));
   box-shadow:0 12px 24px rgba(0,0,0,.15);
-  opacity: 0.65;
-  color: #2733df;
-  background-color: #cad2e7;
-  min-height: 400px;
+  color: #babce2;
+  /* background-color: #b2ccee; */
+  min-height: 300px;
 }
 
 .card h2{
   font-family: var(--font-head);
+  color: #474cb4;
   font-size:3.6rem;
   margin-bottom:1.2rem;
 }
 .card h4{
   font-family: var(--font-head);
   font-size:1.6rem;
-  color: #2e39d3;
+  color: #474cb4;
 }
 
 /* ─── Form & button ───────────────────────────────────────── */
@@ -115,21 +114,29 @@ input[type=radio]{accent-color:var(--accent)}
 label{font-size:1.1rem;font-weight:500;cursor:pointer}
 
 .btn{
-  display:block;width:100%;
-  margin-top:1.8rem;padding:.8rem 1rem;
-  border:none;border-radius:8px;
-  background:var(--accent);color:#fff;
-  font-weight:600;font-size:1rem;
-  cursor:pointer;transition:background .2s;
+  display:block;
+  width:100%;
+  margin-top:1.8rem;
+  padding:.8rem 1rem;
+  border:none;
+  border-radius:20px;
+  background:#474cb4;
+  color: #ffffff;
+  font-weight:600;
+  font-size:1rem;
+  cursor:pointer;
+  transition:background .2s;
 }
 .btn:hover:not([disabled]){background:var(--accent-dark)}
 .btn:disabled{cursor:not-allowed;opacity:.6}
 
 /* Success / error note */
 .success,.error{
-  margin-top:1rem;font-weight:600
+  font-weight:600;
+  font-size: 2rem;
 }
-.success{color:#12814c}.error{color:#c7332d}
+.success{color:#12814c}
+.error{color:#c7332d}
 
 /* ─── Countdown strip ─────────────────────────────────────── */
 #countdown{
@@ -142,7 +149,7 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
   display:flex;flex-direction:column;align-items:center;
 }
 #countdown .number{
-  background:#1e1e1e;
+  background: var(--accent-dark);
   color:#fff;
   font-size:3rem;line-height:1;
   width:90px;
@@ -213,7 +220,7 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
 
 /* ─── Checked state ──────────────────────────────────── */
 .toggle input:checked + .track{
-  background:#28b64e;            /* green background */
+  background:#454ec9;            /* green background */
 }
 .toggle input:checked + .track .thumb{
   left:104px;                    /* slide to the right */
@@ -221,3 +228,9 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
 .toggle input:checked + .track .yes{opacity:1;}
 .toggle input:not(:checked) + .track .no{opacity:1;}
 
+h3 {
+  margin-top: 1rem;
+  color: X#243541;
+  font-size: 100px;
+  font-family: var(--font-head);
+}
