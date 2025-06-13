@@ -35,6 +35,8 @@
       </label>
       <!-- ✓ button now INSIDE the form -->
       <button class="btn" type="submit">Submit</button>
+      <p id="err" class="error" style="display:none">Error — please try again.</p>
+      <p id="msg" class="success" style="display:none"></p>
     </form>
 
 
@@ -52,8 +54,6 @@
     <div class="section"><span class="number" id="s">00</span><span class="lab">Seconds</span></div>
   </div>
   <h3>Until the wedding</h3>
-  <p id="err" class="error" style="display:none">Error — please try again.</p>
-  <p id="msg" class="success" style="display:none"></p>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore, doc, setDoc, serverTimestamp }
@@ -68,10 +68,10 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code || code.length !== 6){
-  document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
-  throw new Error();
-}
+// if (!code || code.length !== 6){
+//   document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
+//   throw new Error();
+// }
 
 /* --- form handler ----------------------------------------------- */
 const form  = document.getElementById('rsvpForm');
@@ -100,6 +100,7 @@ form.addEventListener('submit', async e => {
 
   }catch(err){
     console.error(err);
+    form.style.display = 'none';      // hide the slider & button
     errP.style.display = 'block';
   }
 });
