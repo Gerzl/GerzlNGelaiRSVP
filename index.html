@@ -21,7 +21,7 @@
         src="images/KhristianAndAngelicaNames.png"
         alt="Khristian and Angelica">
   <div class="card">
-    <h4>Invite you to their wedding</h4>
+    <h4>We invite you to our wedding</h4>
     <h2>Will you attend?</h2>
 
     <form id="rsvpForm">
@@ -68,7 +68,7 @@ const db = getFirestore(app);
 
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
 if (!code || code.length !== 6){
-  document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
+  document.body.innerHTML='<p style="font-size:30px">Bad invite code. <br> Please message the couple if it still doesn\'t work </p>';
   throw new Error();
 }
 
@@ -90,8 +90,8 @@ form.addEventListener('submit', async e => {
     await setDoc(ref, { attending, ts: serverTimestamp() });
 
     msg.textContent = attending
-      ? "Wonderful — your seat is reserved! We can’t wait to celebrate with you."
-      : "We’ll miss you, but thank you for letting us know. ♥";
+      ? "Your seat/s have been reserved! See you at the wedding -Gelai & Gerzl"
+      : "We’ll miss you. Thank you for letting us know.";
     msg.style.display = 'block';
 
     /* hide only the interactive controls */
