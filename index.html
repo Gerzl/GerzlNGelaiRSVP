@@ -10,14 +10,18 @@
   <link rel="stylesheet" href="responsive-clock.css"><!-- your mobile tweaks -->
 </head>
 <body>
-  <img class="mid-band"
-     src="images/KhristianAndAngelica.png"
-     alt=""
-     aria-hidden="true">
-  <!-- <img class="title-img"
-     src="images/KhristianAndAngelica.png"
-     alt="Khristian and Angelica"> -->
+  <!-- blue torn background bar -->
+    <img class="mid-band"
+        src="images/KhristianAndAngelicaBG.png"
+        alt=""
+        aria-hidden="true">
+
+    <!-- white script names (front layer) -->
+    <img class="names-img"
+        src="images/KhristianAndAngelicaNames.png"
+        alt="Khristian and Angelica">
   <div class="card">
+    <h4>Invite you to their wedding</h4>
     <h2>Will you attend?</h2>
 
     <form id="rsvpForm">
@@ -64,10 +68,10 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code || code.length !== 6){
-  document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
-  throw new Error();
-}
+// if (!code || code.length !== 6){
+//   document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
+//   throw new Error();
+// }
 
 /* --- form handler ----------------------------------------------- */
 const form  = document.getElementById('rsvpForm');

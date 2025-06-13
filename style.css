@@ -2,7 +2,7 @@
 :root{
   --accent:      #2563eb;          /* royal-blue accent */
   --accent-dark: #1e4fd6;
-  --fg-card:     rgba(255,255,255,.82);
+  --fg-card:     #ffffffd1;
   --blur-card:   20px;
   --font-head:   'Great Vibes', cursive;
   --font-base:   'Inter', system-ui, Arial, sans-serif;
@@ -46,39 +46,43 @@ body::after{
 }
 
 /* ─── Middle torn banner ─────────────────────────────────── */
+/* ─── Middle torn bar (update) ─────────────────────────── */
+/* blue torn bar */
 .mid-band{
-  position:fixed;                 /* stay put on scroll */
-  top:25%; left:50%;
-  transform:translate(-50%,-50%); /* perfect centering */
-  width:max(120vw, 100%, 1600px);                    /* stretch edge-to-edge */
-  max-width:none;
-  pointer-events:none;            /* clicks pass through */
-  z-index:-2;                     /* sits above floral frame (-3) */
+  position:fixed;
+  top:20%; left:50%;
+  transform:translate(-50%,-50%);
+  width:96rem;
+  pointer-events:none;
+  z-index:-4;          /* 🔹 was –2  →  now behind floral frame */
 }
 
-/* optional: shrink on very narrow phones */
+/* names artwork */
+.names-img{
+  position:fixed;
+  top:20%; left:50%;
+  transform:translate(-50%,-50%);
+  width:128rem;
+  pointer-events:none;
+  z-index:-2;          /* stays above the ribbon, below UI */
+}
+
+/* optional: shrink further on very small phones */
 @media(max-width:480px){
-  .mid-band{width:140vw;}         /* a little overscan so edges still show */
-}
-
-
-/* ─── Fancy names heading ─────────────────────────────────── */
-h1{
-  font-family:var(--font-head);
-  font-size:8rem;
-  line-height:1.1;
-  color:#c8cee4;
-  -webkit-text-stroke:.7px #b7e3ee;
-  letter-spacing:.5px;
-  text-shadow:0 4px 8px rgba(0,0,0,.3);
-  margin-bottom:2.5rem;
-  opacity:.85;
-}
-
-/* shrink on phones */
-@media(max-width:480px){
+  .names-img{width:300vw;}
+  .mid-band{width:200vw;}
   h1{font-size:3.4rem;}
+    /* shrink the whole pill card */
+  .card{
+    width:92vw;          /* almost edge-to-edge */
+    padding:1.5rem 1rem; /* tighter gutters        */
+    border-radius:28px;  /* softer corners         */
+  }
+
+  /* optional: button */
+  .btn{font-size:.95rem;}
 }
+
 
 /* ─── Glassy card ─────────────────────────────────────────── */
 .card{
@@ -92,11 +96,18 @@ h1{
   opacity: 0.65;
   color: #2733df;
   background-color: #cad2e7;
+  min-height: 400px;
 }
 
 .card h2{
-  font-size:1.5rem;
+  font-family: var(--font-head);
+  font-size:3.6rem;
   margin-bottom:1.2rem;
+}
+.card h4{
+  font-family: var(--font-head);
+  font-size:1.6rem;
+  color: #2e39d3;
 }
 
 /* ─── Form & button ───────────────────────────────────────── */
