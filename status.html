@@ -5,13 +5,11 @@
 <title>RSVP status</title>
 
 <link rel="stylesheet" href="style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="card">
-  <h1>Your response</h1>
+  <h2>Current reply</h2>
   <div id="details"></div>
 
   <!-- editable slider -->
@@ -27,13 +25,14 @@
     <button class="btn" type="submit">Update</button>
   </form>
 
-  <p id="err" class="error" style="display:none">Couldn’t update. Try again?</p>
+  <p id="err" class="error" style="display:none">Could not update. Try again?</p>
 </div>
 
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import {getFirestore, doc, getDoc, setDoc, Timestamp}
-        from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { initializeApp }      from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getFirestore,
+         doc, getDoc, setDoc,
+         Timestamp           } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
@@ -42,50 +41,47 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-/* invite code */
+/* code from URL */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if(!code){document.body.innerHTML='<p class="error">Missing code</p>';throw new Error();}
+if(!code){ document.body.innerHTML='<p class="error">Missing code.</p>'; throw new Error(); }
 
-const rsvpRef = doc(db,'rsvps',code);
+const ref      = doc(db,'rsvps',code);
+const details  = document.getElementById('details');
+const form     = document.getElementById('editForm');
+const toggle   = document.getElementById('editToggle');
+const errP     = document.getElementById('err');
 
-const details = document.getElementById('details');
-const form    = document.getElementById('editForm');
-const toggle  = document.getElementById('editToggle');
-const errP    = document.getElementById('err');
-
-/* load & display ------------------------------------------------ */
+/* ---- load & paint ---- */
 async function load(){
-  const snap = await getDoc(rsvpRef);
-  if(!snap.exists()){
-    details.textContent='No reply yet.'; form.style.display='block';
+  const snap = await getDoc(ref);
+  const updates = snap.exists() ? (snap.data().updates || []) : [];
+  if(!updates.length){
+    details.textContent = 'No reply yet.'; form.style.display='block';
     toggle.checked=false; return;
   }
-  const updates = snap.data().updates || [];
-  const last = updates.length ? updates.at(-1) : {attending:false};
+  const last = updates.at(-1);
   details.innerHTML = `
-    <p>Current answer: <b>${last.attending?'Yes':'No'}</b></p>
-    <div class="list"><u>History (max 5)</u><br>${
-      updates.slice().reverse().map(x=>
-        `${x.ts.toDate().toLocaleString()} — ${x.attending?'Yes':'No'}`).join('<br>')}
+    <p><b>${last.attending?'Yes':'No'}</b> — last updated ${last.ts.toDate().toLocaleString()}</p>
+    <div class="list"><u>Full history</u><br>${
+      updates.slice().reverse()
+             .map(u=>`${u.ts.toDate().toLocaleString()} — ${u.attending?'Yes':'No'}`)
+             .join('<br>')}
     </div>`;
   toggle.checked = last.attending;
-  form.style.display = updates.length>=5 ? 'none':'block';
-  if(updates.length>=5) details.innerHTML +=
-     '<p class="error">Edit limit reached (5).</p>';
+  form.style.display = 'block';
 }
 load();
 
-/* update -------------------------------------------------------- */
+/* ---- write ---- */
 form.addEventListener('submit',async e=>{
   e.preventDefault(); errP.style.display='none';
   try{
-    const snap = await getDoc(rsvpRef);
-    let updates = snap.exists()?snap.data().updates||[]:[];
-    if(updates.length>=5){load();return;}
-    updates.push({attending:toggle.checked, ts: Timestamp.now()});
-    await setDoc(rsvpRef,{updates},{merge:true});
+    const snap = await getDoc(ref);
+    let updates = snap.exists() ? (snap.data().updates || []) : [];
+    updates.push({ attending:toggle.checked, ts: Timestamp.now() });
+    await setDoc(ref,{ updates },{ merge:true });
     load();
-  }catch(err){console.error(err); errP.style.display='block';}
+  }catch(err){ console.error(err); errP.style.display='block'; }
 });
 </script>
 </body>

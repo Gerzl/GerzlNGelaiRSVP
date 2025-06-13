@@ -3,23 +3,19 @@
 <head>
   <meta charset="utf-8">
   <title>RSVP</title>
+
+  <!-- fonts & css -->
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-  <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css">
-  <link rel="stylesheet" href="responsive-clock.css"><!-- your mobile tweaks -->
 </head>
 <body>
-  <!-- blue torn background bar -->
-    <img class="mid-band"
-        src="images/KhristianAndAngelicaBG.png"
-        alt=""
-        aria-hidden="true">
 
-    <!-- white script names (front layer) -->
-    <img class="names-img"
-        src="images/KhristianAndAngelicaNames.png"
-        alt="Khristian and Angelica">
+  <!-- blue torn ribbon (behind floral frame) -->
+  <img class="mid-band"  src="images/KhristianAndAngelicaBG.png"   alt="" aria-hidden="true">
+  <!-- white script names (front) -->
+  <img class="names-img" src="images/KhristianAndAngelicaNames.png" alt="Khristian and Angelica">
+
+  <!-- glassy card -->
   <div class="card">
     <h4>We invite you to our wedding</h4>
     <h2>Will you attend?</h2>
@@ -33,32 +29,32 @@
           <span class="thumb"></span>
         </span>
       </label>
-      <!-- ✓ button now INSIDE the form -->
       <button class="btn" type="submit">Submit</button>
     </form>
-    <p id="err" class="error" style="display:none">Error — please try again.</p>
-    <p id="msg" class="success" style="display:none"></p>
 
+    <p id="err" class="error"   style="display:none">Error — please try again.</p>
+    <p id="msg" class="success" style="display:none"></p>
   </div>
+
+  <!-- simple countdown -->
   <div id="countdown">
     <div class="section"><span class="number" id="d">0</span><span class="lab">Days</span></div>
     <div class="colon">:</div>
-
     <div class="section"><span class="number" id="h">00</span><span class="lab">Hours</span></div>
     <div class="colon">:</div>
-
     <div class="section"><span class="number" id="m">00</span><span class="lab">Minutes</span></div>
     <div class="colon">:</div>
-
     <div class="section"><span class="number" id="s">00</span><span class="lab">Seconds</span></div>
   </div>
   <h3>Until the wedding</h3>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, doc, setDoc, serverTimestamp }
-        from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-/* 🔧 replace with your own */
+<!-- ▸ Firebase logic ------------------------------------------------- -->
+<script type="module">
+import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getFirestore,
+         doc, getDoc, setDoc,
+         serverTimestamp      } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
 const app = initializeApp({
   apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
   authDomain: "gerzlngelairsvp.firebaseapp.com",
@@ -66,77 +62,66 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
+/* ── invite code from URL ── */
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-if (!code || code.length !== 6){
-  document.body.innerHTML='<p style="font-size:30px">Bad invite code. <br> Please message the couple if it still doesn\'t work </p>';
+if(!code || code.length!==6){
+  document.body.innerHTML =
+    '<p style="font-size:28px">Invalid invite link.<br>Please contact the couple.</p>';
   throw new Error();
 }
 
-/* --- form handler ----------------------------------------------- */
-const form  = document.getElementById('rsvpForm');
-const msg   = document.getElementById('msg');
-const errP  = document.getElementById('err');
-const toggle= document.getElementById('rsvpToggle');
+/* ── elements ── */
+const form   = document.getElementById('rsvpForm');
+const toggle = document.getElementById('rsvpToggle');
+const msgP   = document.getElementById('msg');
+const errP   = document.getElementById('err');
 
-
+/* ── submit handler (append to updates[]) ── */
 form.addEventListener('submit', async e => {
-  e.preventDefault();
-  errP.style.display = 'none';
+  e.preventDefault(); errP.style.display='none';
 
   const attending = toggle.checked;
-  const ref = doc(db, 'rsvps', code);
+  const ref       = doc(db,'rsvps',code);
 
   try{
-    await setDoc(ref, { attending, ts: serverTimestamp() });
+    const snap = await getDoc(ref);
+    let updates = snap.exists() ? (snap.data().updates || []) : [];
+    updates.push({ attending, ts: serverTimestamp() });
 
-    msg.textContent = attending
-      ? "Your seat/s have been reserved! See you at the wedding -Gelai & Gerzl"
-      : "We’ll miss you. Thank you for letting us know.";
-    msg.style.display = 'block';
+    /* merge keeps older history intact */
+    await setDoc(ref,{ updates },{ merge:true });
 
-    /* hide only the interactive controls */
-    toggle.closest('.toggle').style.display = 'none';
-    form.querySelector('.btn').style.display = 'none';
+    msgP.textContent = attending
+      ? "Your seat(s) are saved – we can’t wait to celebrate with you!"
+      : "We’ll miss you, but thank you for letting us know. ♥";
+    msgP.style.display='block';
 
   }catch(err){
     console.error(err);
-    errP.style.display = 'block';
+    errP.style.display='block';
   }
 });
-
-
 </script>
+
+<!-- ▸ countdown ----------------------------------------------------- -->
 <script>
 (() => {
-  /* target: 9 Sep 2025 14:00 local browser time */
   const target = new Date('2025-09-09T14:00:00');
-
-  const el = {
-    d: document.getElementById('d'),
-    h: document.getElementById('h'),
-    m: document.getElementById('m'),
-    s: document.getElementById('s')
-  };
+  const el = { d:$('#d'), h:$('#h'), m:$('#m'), s:$('#s') };
+  function $(id){ return document.getElementById(id); }
 
   function tick(){
-    const now   = new Date();
-    let diffSec = Math.max(0, Math.floor((target - now) / 1000));
-
-    const d = Math.floor(diffSec / 86400); diffSec %= 86400;
-    const h = Math.floor(diffSec / 3600);  diffSec %= 3600;
-    const m = Math.floor(diffSec / 60);
-    const s = diffSec % 60;
-
-    el.d.textContent = d;
-    el.h.textContent = h.toString().padStart(2,'0');
-    el.m.textContent = m.toString().padStart(2,'0');
-    el.s.textContent = s.toString().padStart(2,'0');
+    let diff = Math.max(0, Math.floor((target - Date.now())/1000));
+    const d=Math.floor(diff/86400); diff%=86400;
+    const h=Math.floor(diff/3600);  diff%=3600;
+    const m=Math.floor(diff/60);    const s=diff%60;
+    el.d.textContent=d;
+    el.h.textContent=h.toString().padStart(2,'0');
+    el.m.textContent=m.toString().padStart(2,'0');
+    el.s.textContent=s.toString().padStart(2,'0');
   }
-
-  tick();                   // initial paint
-  setInterval(tick,1000);   // update every second
+  tick(); setInterval(tick,1000);
 })();
 </script>
-
 </body>
 </html>
