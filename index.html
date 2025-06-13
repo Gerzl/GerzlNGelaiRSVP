@@ -107,21 +107,33 @@ form.addEventListener('submit', async e => {
 <!-- ▸ countdown ----------------------------------------------------- -->
 <script>
 (() => {
+  /* target: 9 Sep 2025 14:00 local browser time */
   const target = new Date('2025-09-09T14:00:00');
-  const el = { d:$('#d'), h:$('#h'), m:$('#m'), s:$('#s') };
-  function $(id){ return document.getElementById(id); }
+
+  const el = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s')
+  };
 
   function tick(){
-    let diff = Math.max(0, Math.floor((target - Date.now())/1000));
-    const d=Math.floor(diff/86400); diff%=86400;
-    const h=Math.floor(diff/3600);  diff%=3600;
-    const m=Math.floor(diff/60);    const s=diff%60;
-    el.d.textContent=d;
-    el.h.textContent=h.toString().padStart(2,'0');
-    el.m.textContent=m.toString().padStart(2,'0');
-    el.s.textContent=s.toString().padStart(2,'0');
+    const now   = new Date();
+    let diffSec = Math.max(0, Math.floor((target - now) / 1000));
+
+    const d = Math.floor(diffSec / 86400); diffSec %= 86400;
+    const h = Math.floor(diffSec / 3600);  diffSec %= 3600;
+    const m = Math.floor(diffSec / 60);
+    const s = diffSec % 60;
+
+    el.d.textContent = d;
+    el.h.textContent = h.toString().padStart(2,'0');
+    el.m.textContent = m.toString().padStart(2,'0');
+    el.s.textContent = s.toString().padStart(2,'0');
   }
-  tick(); setInterval(tick,1000);
+
+  tick();                   // initial paint
+  setInterval(tick,1000);   // update every second
 })();
 </script>
 </body>
