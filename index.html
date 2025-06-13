@@ -53,7 +53,8 @@
 import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore,
          doc, getDoc, setDoc,
-         serverTimestamp      } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+         Timestamp      } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
 
 const app = initializeApp({
   apiKey: "AIzaSyD5N9MzxEeVghPM_R7CDlBrlWlZMAU95T0",
@@ -86,7 +87,7 @@ form.addEventListener('submit', async e => {
   try{
     const snap = await getDoc(ref);
     let updates = snap.exists() ? (snap.data().updates || []) : [];
-    updates.push({ attending, ts: serverTimestamp() });
+    updates.push({ attending, ts: Timestamp.now() });
 
     /* merge keeps older history intact */
     await setDoc(ref,{ updates },{ merge:true });
