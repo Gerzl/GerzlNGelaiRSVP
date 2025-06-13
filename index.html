@@ -35,10 +35,9 @@
       </label>
       <!-- ✓ button now INSIDE the form -->
       <button class="btn" type="submit">Submit</button>
-      <p id="err" class="error" style="display:none">Error — please try again.</p>
-      <p id="msg" class="success" style="display:none"></p>
     </form>
-
+    <p id="err" class="error" style="display:none">Error — please try again.</p>
+    <p id="msg" class="success" style="display:none"></p>
 
   </div>
   <div id="countdown">
@@ -68,10 +67,10 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const code = new URLSearchParams(location.search).get('code')?.toUpperCase();
-// if (!code || code.length !== 6){
-//   document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
-//   throw new Error();
-// }
+if (!code || code.length !== 6){
+  document.body.innerHTML='<p style="font-size:40px">Bad invite link.</p>';
+  throw new Error();
+}
 
 /* --- form handler ----------------------------------------------- */
 const form  = document.getElementById('rsvpForm');
@@ -84,26 +83,27 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   errP.style.display = 'none';
 
-  const attending = toggle.checked;   // true = YES, false = NO
-  const ref = doc(db,'rsvps',code);
+  const attending = toggle.checked;
+  const ref = doc(db, 'rsvps', code);
 
   try{
-    await setDoc(ref,{attending, ts: serverTimestamp()});
+    await setDoc(ref, { attending, ts: serverTimestamp() });
 
-    // 🟢 friendly feedback
     msg.textContent = attending
-      ? "Wonderful—your seat is reserved! We can’t wait to celebrate with you."
+      ? "Wonderful — your seat is reserved! We can’t wait to celebrate with you."
       : "We’ll miss you, but thank you for letting us know. ♥";
     msg.style.display = 'block';
 
-    form.style.display = 'none';      // hide the slider & button
+    /* hide only the interactive controls */
+    toggle.closest('.toggle').style.display = 'none';
+    form.querySelector('.btn').style.display = 'none';
 
   }catch(err){
     console.error(err);
-    form.style.display = 'none';      // hide the slider & button
     errP.style.display = 'block';
   }
 });
+
 
 </script>
 <script>

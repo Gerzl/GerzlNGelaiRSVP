@@ -1,7 +1,8 @@
 /* ─── Variables ───────────────────────────────────────────── */
 :root{
-  --accent:      #2563eb;          /* royal-blue accent */
+  --accent:      #2c57b4;          /* royal-blue accent */
   --accent-dark: #91b8c5;
+  --card-accent: #4364ac;
   --fg-card:     #b6cadb9f;
   --blur-card:   20px;
   --font-head:   'Great Vibes', cursive;
@@ -92,21 +93,21 @@ body::after{
   border-radius:42px;
   background:var(--fg-card);
   box-shadow:0 12px 24px rgba(0,0,0,.15);
-  color: #babce2;
+  color: #243541;
   /* background-color: #b2ccee; */
   min-height: 300px;
 }
 
 .card h2{
   font-family: var(--font-head);
-  color: #474cb4;
+  color: var(--card-accent);
   font-size:3.6rem;
   margin-bottom:1.2rem;
 }
 .card h4{
   font-family: var(--font-head);
   font-size:1.6rem;
-  color: #474cb4;
+  color: var(--card-accent);
 }
 
 /* ─── Form & button ───────────────────────────────────────── */
@@ -120,7 +121,7 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
   padding:.8rem 1rem;
   border:none;
   border-radius:20px;
-  background:#474cb4;
+  background:var(--card-accent);
   color: #ffffff;
   font-weight:600;
   font-size:1rem;
@@ -230,7 +231,7 @@ label{font-size:1.1rem;font-weight:500;cursor:pointer}
 
 h3 {
   margin-top: 1rem;
-  color: X#243541;
   font-size: 100px;
   font-family: var(--font-head);
+  color: #266991;
 }
